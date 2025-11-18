@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, generatedTasks, ruleExplanations, InsertGeneratedTask, InsertRuleExplanation } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,44 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+export async function saveGeneratedTask(task: InsertGeneratedTask): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot save generated task: database not available");
+    return;
+  }
+
+  try {
+    await db.insert(generatedTasks).values(task);
+  } catch (error) {
+    console.error("[Database] Failed to save generated task:", error);
+    throw error;
+  }
+}
+
+export async function getRuleExplanation(ruleTitle: string) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get rule explanation: database not available");
+    return undefined;
+  }
+
+  const result = await db.select().from(ruleExplanations).where(eq(ruleExplanations.ruleTitle, ruleTitle)).limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function saveRuleExplanation(explanation: InsertRuleExplanation): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot save rule explanation: database not available");
+    return;
+  }
+
+  try {
+    await db.insert(ruleExplanations).values(explanation);
+  } catch (error) {
+    console.error("[Database] Failed to save rule explanation:", error);
+    throw error;
+  }
+}

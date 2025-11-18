@@ -25,4 +25,39 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-// TODO: Add your tables here
+/**
+ * Generated tasks from the methodology assistant.
+ * Stores tasks created by the LLM based on user goals and current lifecycle stage.
+ */
+export const generatedTasks = mysqlTable("generatedTasks", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  stage: varchar("stage", { length: 32 }).notNull(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  estimate: int("estimate").notNull(),
+  risk: varchar("risk", { length: 32 }).notNull(),
+  priority: varchar("priority", { length: 32 }).notNull(),
+  userGoal: text("userGoal").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type GeneratedTask = typeof generatedTasks.$inferSelect;
+export type InsertGeneratedTask = typeof generatedTasks.$inferInsert;
+
+/**
+ * Rule explanations cache.
+ * Stores LLM-generated explanations for methodology rules to reduce API calls.
+ */
+export const ruleExplanations = mysqlTable("ruleExplanations", {
+  id: int("id").autoincrement().primaryKey(),
+  ruleTitle: varchar("ruleTitle", { length: 128 }).notNull().unique(),
+  ruleDescription: text("ruleDescription").notNull(),
+  explanation: text("explanation").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type RuleExplanation = typeof ruleExplanations.$inferSelect;
+export type InsertRuleExplanation = typeof ruleExplanations.$inferInsert;
